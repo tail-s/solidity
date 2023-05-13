@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity ^0.8.19;
 
-import "/Allowance.sol";
+import "./Allowance.sol";
 
 contract SimpleWallet is Allowance {
 
@@ -9,7 +11,7 @@ contract SimpleWallet is Allowance {
 
     function withdrawMondy(address payable _to, uint _amount) public ownerOrAllowed(_amount) {
         require(_amount <= address(this).balance, "There are not enough funds stored in this smart contracts");
-        if(!isOwner()) {
+        if(msg.sender != owner()) {
             reduceAllowance(msg.sender, _amount);
         }
         emit MoneySent(_to, _amount);
@@ -17,9 +19,9 @@ contract SimpleWallet is Allowance {
     }
 
     // contract의 소유권을 포기하는 method.
-    function renounceOwnership() public onlyOwner {
+    function renounceOwnership() public view onlyOwner override {
         revert("Can't renounce ownership here");
-    };
+    }
 
     receive() external payable {
         emit MoneyRecieved(msg.sender, msg.value);
